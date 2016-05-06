@@ -33,6 +33,9 @@
                     <target>clean</target>
                     <target>build</target>
                 </action>
+                <action name="run">
+                    <target>deploy</target>
+                </action>
             </ide-actions>
             <view>
                 <items>
@@ -51,6 +54,7 @@
                     <ide-action name="build"/>
                     <ide-action name="rebuild"/>
                     <ide-action name="clean"/>
+                    <ide-action name="run"/>
                     <action>
                         <label>Deploy to Server</label>
                         <target>deploy</target>

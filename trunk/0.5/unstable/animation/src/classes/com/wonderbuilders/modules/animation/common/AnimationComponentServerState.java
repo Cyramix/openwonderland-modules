@@ -18,6 +18,10 @@ public class AnimationComponentServerState extends CellComponentServerState {
     /** Current animation state. */
     private Animation animation;
     
+    private String methodCall;
+    
+    private String parameter;
+    
     /**
      * Creates new instance.
      */
@@ -46,6 +50,22 @@ public class AnimationComponentServerState extends CellComponentServerState {
      */
     public Animation getAnimation() {
         return animation;
+    }
+
+    public String getMethodCall() {
+        return methodCall;
+    }
+
+    public void setMethodCall(String methodCall) {
+        this.methodCall = methodCall;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
     }
 
 }

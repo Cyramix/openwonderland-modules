@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2016, Envisiture Consulting, LLC, All Rights Reserved
+ */
+/**
  * Copyright (c) 2012, WonderBuilders, Inc., All Rights Reserved
  */
 package com.wonderbuilders.modules.animation.client;
@@ -25,6 +28,8 @@ import com.wonderbuilders.modules.animation.common.FrameRange;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.SortedSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.jdesktop.mtgame.RenderComponent;
 import org.jdesktop.wonderland.client.cell.Cell;
 import org.jdesktop.wonderland.client.cell.CellComponent;
@@ -61,6 +66,7 @@ public class AnimationComponent extends CellComponent implements ProximityListen
      */
     private static final ResourceBundle BUNDLE = ResourceBundle.getBundle(
             "com/wonderbuilders/modules/animation/client/resources/strings");
+    private static final Logger logger = Logger.getLogger(AnimationComponent.class.getName());
 
     /**
      * EZScript function to play animation once.
@@ -86,6 +92,10 @@ public class AnimationComponent extends CellComponent implements ProximityListen
      * Animation control state.
      */
     private Animation animation;
+
+    private String methodCall = null;
+
+    private String parameter = null;
 
     /**
      * Indicates that animation played at least once.
@@ -128,6 +138,8 @@ public class AnimationComponent extends CellComponent implements ProximityListen
      * Default play direction for EZScript.
      */
     private ColladaAnimation.PlayDirection scriptDirection = ColladaAnimation.PlayDirection.FORWARD;
+
+    private boolean processing = true;
 
     /**
      * Creates new instance.
@@ -172,6 +184,7 @@ public class AnimationComponent extends CellComponent implements ProximityListen
                     return true;
                 }
             });
+            processing = false;
             setTrigger();
             ezScript = cell.getComponent(EZScriptComponent.class);
             // add message receiver for synchronizing state
@@ -196,12 +209,20 @@ public class AnimationComponent extends CellComponent implements ProximityListen
                 }
             }
         }
+        //updating the client to the current state in world
+        if (status == CellStatus.VISIBLE) {
+            logger.log(Level.INFO, "%%% Checking method call = {0} %%%", methodCall);
+            if (methodCall != null && !cell.getName().equals("MRI-MACHINE")) {
+                verifyLastMethodCall();
+            }
+        }
     }
 
     @Override
     public void setClientState(CellComponentClientState clientState) {
         super.setClientState(clientState);
         AnimationComponentClientState accs = (AnimationComponentClientState) clientState;
+        logger.info("%%% Setting client state animation component %%%");
         animation = accs.getAnimation();
         if (animationGroup != null) {
             if (animation.getPlayType() == Animation.AnimationPlayType.LOOP) {
@@ -210,8 +231,15 @@ public class AnimationComponent extends CellComponent implements ProximityListen
                 animationGroup.setLoopMode(ColladaAnimationGroup.LoopMode.NONE);
             }
         }
+        methodCall = accs.getMethodCall();
+        parameter = accs.getParameter();
         if (cell.getStatus() == CellStatus.VISIBLE) {
             setTrigger();
+            //updating the client to the current state in world
+            if (methodCall != null && !cell.getName().equals("MRI-MACHINE")) {
+                logger.log(Level.INFO, "method call = {0} play type === {1}", new Object[]{methodCall, animation.getPlayType()});
+                verifyLastMethodCall();
+            }
         }
 
     }
@@ -311,6 +339,47 @@ public class AnimationComponent extends CellComponent implements ProximityListen
                 }
             };
             ctxMenuComp.addContextMenuFactory(ctxMenuFactory);
+        }
+    }
+    /**
+     * verifies the current state of the animation and sync it with the current
+     * client while logging in.
+     */
+    void verifyLastMethodCall() {
+        logger.log(Level.INFO, "inside verifyLastMethodCall getPlayType = {0}", animation.getPlayType());
+        while (processing) {
+            logger.info("Processing...");
+            if (animationGroup != null) {
+                processing = false;
+            }
+        }
+        logger.info("Finished Processing");
+        if ("toggleAnimation".equals(methodCall)) {
+            toggleAnimation();
+        } else if ("executeAnimationCommand".equals(methodCall)) {
+            logger.info("inside executeAnimationCommand = methodCall");
+
+            if (animation.getPlayType() == Animation.AnimationPlayType.FRAME_RANGE) {
+                logger.log(Level.INFO, "inside anim play type = frame : command = {0}", parameter);
+                animationGroup.setPlaybackSpeed(1.0f);
+                if (animation.isFrameRangePlayCommand(parameter)) {
+                    logger.info("inside isFrameRangePlayCommand(parameter)");
+                    FrameRange fr = animation.getFrameRangeForCommand(parameter);
+                    if (fr != null) {
+                        int strt = fr.getEnd() - 1;
+                        logger.log(Level.INFO, "fr != null : ramge start = {0} end = {1} strt = {2}", new Object[]{fr.getStart(), fr.getEnd(), strt});
+                        final Thread th = new Thread(new FrameRangePlayer(animationGroup, strt, fr.getEnd()));
+                        th.start();
+                    } else {
+                        throw new IllegalStateException("No valid frame range found for command " + parameter);
+                    }
+                } else {
+                    throw new IllegalStateException("Animation is configured to play a frame range. Please supply valid command.");
+                }
+            } else {
+                logger.log(Level.INFO, "else executeAnimationCommand command = {0}", parameter);
+                executeAnimationCommand(parameter);
+            }
         }
     }
 
@@ -513,12 +582,35 @@ public class AnimationComponent extends CellComponent implements ProximityListen
                 }
                 break;
             case LOOP:
+                animationGroup.setPlaybackSpeed(1.0f);
                 if (cmdName.equals(animation.getStartLoop()) || cmdName.equals(AnimationConstants.DEFAULT_START_COMMAND)) {
+                    ctxMenuItems[0].setEnabled(false);
+                    ctxMenuItems[1].setEnabled(true);
                     // play animation loop
-                    toggleAnimation();
+                    if (animationGroup.getLoopMode() != ColladaAnimationGroup.LoopMode.REPEAT) {
+                        animationGroup.setLoopMode(ColladaAnimationGroup.LoopMode.REPEAT);
+                    }
+                    animationGroup.setPlayDirection(ColladaAnimation.PlayDirection.FORWARD);
+                    animationGroup.setPlaying(true);
+                    // handle EZScript animation
+                    if (hasEZScriptFunction(PLAY_LOOP_FUNCTION)) {
+                        String script = PLAY_LOOP_FUNCTION + "(" + true + ");";
+                        ezScript.executeScript(script);
+                    }
                 } else if (cmdName.equals(animation.getStopLoop()) || cmdName.equals(AnimationConstants.DEFAULT_STOP_COMMAND)) {
+                    ctxMenuItems[0].setEnabled(true);
+                    ctxMenuItems[1].setEnabled(false);
                     // stop animation loop
-                    toggleAnimation();
+                    if (animationGroup.getLoopMode() != ColladaAnimationGroup.LoopMode.REPEAT) {
+                        animationGroup.setLoopMode(ColladaAnimationGroup.LoopMode.REPEAT);
+                    }
+                    animationGroup.setPlayDirection(ColladaAnimation.PlayDirection.FORWARD);
+                    animationGroup.setPlaying(false);
+                    // handle EZScript animation
+                    if (hasEZScriptFunction(PLAY_LOOP_FUNCTION)) {
+                        String script = PLAY_LOOP_FUNCTION + "(" + false + ");";
+                        ezScript.executeScript(script);
+                    }
                 } else {
                     throw new IllegalStateException("Animation is configured to play in a loop. Please change play type.");
                 }
@@ -628,6 +720,8 @@ public class AnimationComponent extends CellComponent implements ProximityListen
         @Override
         public void messageReceived(CellMessage message) {
             AnimationComponentMessage msg = (AnimationComponentMessage) message;
+            methodCall = msg.getMethodCall();
+            parameter = msg.getParameter();
             if (!msg.getSenderID().equals(cell.getCellCache().getSession().getID())) {
                 if ("toggleAnimation".equals(msg.getMethodCall())) {
                     toggleAnimation();
@@ -645,8 +739,27 @@ public class AnimationComponent extends CellComponent implements ProximityListen
      * @param param method parameter
      */
     void sendUpdateMessage(String method, String param) {
+        logger.info("sendUpdateMessage: method = " + method + " : param = " + param);
+        logger.info("sendUpdateMessage: Animation name = " + animation.getName());
         AnimationComponentMessage msg = new AnimationComponentMessage(cell.getCellID(), method, param);
         cell.sendCellMessage(msg);
     }
 
+    public boolean isAnimationPlaying() {
+        return animationGroup.isPlaying();
+    }
+
+    public Animation getAnimation() {
+        return animation;
+    }
+
+    public String getMethodCall() {
+        return methodCall;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+    
+    
 }
