@@ -13,7 +13,11 @@ public class AnimationComponentClientState extends CellComponentClientState {
 
     /** Current animation state. */
     private Animation animation;
-
+    
+    private String methodCall = null;
+    
+    private String parameter;
+    
     /**
      * Set current animation state.
      * 
@@ -30,6 +34,22 @@ public class AnimationComponentClientState extends CellComponentClientState {
      */
     public Animation getAnimation() {
         return animation;
+    }
+
+    public String getMethodCall() {
+        return methodCall;
+    }
+
+    public void setMethodCall(String methodCall) {
+        this.methodCall = methodCall;
+    }
+
+    public String getParameter() {
+        return parameter;
+    }
+
+    public void setParameter(String parameter) {
+        this.parameter = parameter;
     }
     
 }

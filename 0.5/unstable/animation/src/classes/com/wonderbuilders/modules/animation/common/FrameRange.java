@@ -102,11 +102,11 @@ public class FrameRange implements Comparable<FrameRange>, Serializable {
     @Override
     public int compareTo(FrameRange o) {
         int status = 0;
-        if(o.getStart() > start && o.getEnd() > end){
-            status = -1;
-        } else if(start > o.getStart() && end > o.getEnd()){
+//        if(o.getStart() > start && o.getEnd() > end){
+//            status = -1;
+//        } else if(start > o.getStart() && end > o.getEnd()){
             status = 1;
-        }
+//        }
         return status;
     }
 

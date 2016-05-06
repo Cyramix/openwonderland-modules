@@ -24,7 +24,7 @@
     <pathconvert property="module-client.classpath">
         <path location="${modules.dir}/foundation/content-repository/build/client/contentrepo-client.jar"/>
         <path location="${modules.dir}/foundation/sharedstate/build/client/sharedstate-client.jar"/>
-        <path location="${modules.unstable.dir}/EZScript/build/client/EZScript-client.jar"/>
+        <path location="../EZScript/build/client/EZScript-client.jar"/>
     </pathconvert>
 
     <target name="build" depends="-module-init, -module-compile-common,
