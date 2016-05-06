@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2016, Envisiture Consulting, LLC, All Rights Reserved
+ */
+/**
  * Project Wonderland
  *
  * Copyright (c) 2004-2010, Sun Microsystems, Inc., All Rights Reserved
@@ -33,6 +36,7 @@ import org.jdesktop.wonderland.modules.avatarbase.client.jme.cellrenderer.WlAvat
  *
  * @author Jordan Slott <jslott@dev.java.net>
  * @author nsimpson
+ * @author Abhishek Upadhyay <abhiit61@gmail.com>
  */
 public class QuickReferenceJPanel extends javax.swing.JPanel {
 
@@ -127,19 +131,18 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         lookUpDownLabel = new javax.swing.JLabel();
         ctrlButtonLabel = new javax.swing.JLabel();
         ctrlButton = new javax.swing.JButton();
-        leftMouseButtonShadowLabel = new javax.swing.JLabel();
         mouseShadowLabel = new javax.swing.JLabel();
-        stepBackwardShadowLabel1 = new javax.swing.JLabel();
         zoomInOutLabel = new javax.swing.JLabel();
         zoomInOutButton = new javax.swing.JButton();
         zoomArrowLabel = new javax.swing.JLabel();
         mouseShadowLabel1 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
 
         setBackground(new java.awt.Color(237, 236, 236));
         setPreferredSize(new java.awt.Dimension(500, 240));
         setLayout(null);
 
-        runLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        runLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         runLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("org/jdesktop/wonderland/modules/quickreference/client/resources/Bundle"); // NOI18N
         runLabel.setText(bundle.getString("RUN")); // NOI18N
@@ -147,7 +150,7 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         runLabel.setBounds(100, 3, 70, 16);
 
         runButtonLabel.setBackground(new java.awt.Color(255, 255, 255));
-        runButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        runButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         runButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         runButtonLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         runButtonLabel.setText(bundle.getString("SHIFT")); // NOI18N
@@ -182,19 +185,19 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(runShadowLabel);
         runShadowLabel.setBounds(100, 20, 72, 65);
 
-        stepLabel1.setFont(new java.awt.Font("Arial", 0, 10));
+        stepLabel1.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         stepLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         stepLabel1.setText(bundle.getString("STEP")); // NOI18N
         add(stepLabel1);
         stepLabel1.setBounds(38, 95, 70, 16);
 
-        leftLabel1.setFont(new java.awt.Font("Arial", 0, 10));
+        leftLabel1.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         leftLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         leftLabel1.setText(bundle.getString("LEFT")); // NOI18N
         add(leftLabel1);
         leftLabel1.setBounds(38, 108, 70, 16);
 
-        stepLeftButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        stepLeftButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         stepLeftButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         stepLeftButtonLabel.setText(bundle.getString("Q")); // NOI18N
         stepLeftButtonLabel.setFocusable(false);
@@ -229,19 +232,19 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(stepLeftShadowLabel);
         stepLeftShadowLabel.setBounds(34, 45, 57, 60);
 
-        stepLabel2.setFont(new java.awt.Font("Arial", 0, 10));
+        stepLabel2.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         stepLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         stepLabel2.setText(bundle.getString("STEP")); // NOI18N
         add(stepLabel2);
         stepLabel2.setBounds(165, 95, 70, 16);
 
-        rightLabel1.setFont(new java.awt.Font("Arial", 0, 10));
+        rightLabel1.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         rightLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         rightLabel1.setText(bundle.getString("RIGHT")); // NOI18N
         add(rightLabel1);
         rightLabel1.setBounds(165, 108, 70, 16);
 
-        stepRightButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        stepRightButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         stepRightButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         stepRightButtonLabel.setText(bundle.getString("E")); // NOI18N
         stepRightButtonLabel.setFocusable(false);
@@ -277,13 +280,13 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(stepRightShadowLabel);
         stepRightShadowLabel.setBounds(180, 45, 57, 60);
 
-        forwardLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        forwardLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         forwardLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         forwardLabel.setText(bundle.getString("FORWARD")); // NOI18N
         add(forwardLabel);
         forwardLabel.setBounds(100, 120, 70, 16);
 
-        stepForwardButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        stepForwardButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         stepForwardButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         stepForwardButtonLabel.setText(bundle.getString("W")); // NOI18N
         stepForwardButtonLabel.setFocusable(false);
@@ -318,13 +321,13 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(stepForwardShadowLabel);
         stepForwardShadowLabel.setBounds(106, 76, 57, 60);
 
-        backwardLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        backwardLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         backwardLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         backwardLabel.setText(bundle.getString("BACKWARD")); // NOI18N
         add(backwardLabel);
         backwardLabel.setBounds(100, 220, 70, 16);
 
-        stepBackwardButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        stepBackwardButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         stepBackwardButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         stepBackwardButtonLabel.setText(bundle.getString("S")); // NOI18N
         stepBackwardButtonLabel.setFocusable(false);
@@ -359,19 +362,19 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(stepBackwardShadowLabel);
         stepBackwardShadowLabel.setBounds(106, 160, 57, 60);
 
-        turnLabel1.setFont(new java.awt.Font("Arial", 0, 10));
+        turnLabel1.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         turnLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         turnLabel1.setText(bundle.getString("TURN_LEFT")); // NOI18N
         add(turnLabel1);
         turnLabel1.setBounds(0, 135, 63, 16);
 
-        leftLabel2.setFont(new java.awt.Font("Arial", 0, 10));
+        leftLabel2.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         leftLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         leftLabel2.setText(bundle.getString("TO_LEFT")); // NOI18N
         add(leftLabel2);
         leftLabel2.setBounds(0, 148, 63, 16);
 
-        turnLeftButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        turnLeftButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         turnLeftButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         turnLeftButtonLabel.setText(bundle.getString("A")); // NOI18N
         turnLeftButtonLabel.setFocusable(false);
@@ -411,17 +414,17 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(runningLabel);
         runningLabel.setBounds(127, 138, 18, 20);
 
-        turnLabel2.setFont(new java.awt.Font("Arial", 0, 10));
+        turnLabel2.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         turnLabel2.setText(bundle.getString("TURN_RIGHT")); // NOI18N
         add(turnLabel2);
         turnLabel2.setBounds(209, 135, 80, 16);
 
-        rightLabel2.setFont(new java.awt.Font("Arial", 0, 10));
+        rightLabel2.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         rightLabel2.setText(bundle.getString("TO_RIGHT")); // NOI18N
         add(rightLabel2);
         rightLabel2.setBounds(209, 148, 60, 16);
 
-        turnRightButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        turnRightButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         turnRightButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         turnRightButtonLabel.setText(bundle.getString("D")); // NOI18N
         turnRightButtonLabel.setFocusable(false);
@@ -456,20 +459,20 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(turnRightShadowLabel);
         turnRightShadowLabel.setBounds(150, 118, 57, 60);
 
-        goUpLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        goUpLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         goUpLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         goUpLabel.setText(bundle.getString("GO_UP")); // NOI18N
         add(goUpLabel);
         goUpLabel.setBounds(227, 75, 140, 16);
 
-        pageButtonLabel.setFont(new java.awt.Font("Arial", 2, 11));
+        pageButtonLabel.setFont(new java.awt.Font("Arial", 2, 11)); // NOI18N
         pageButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         pageButtonLabel.setText(bundle.getString("PAGE")); // NOI18N
         pageButtonLabel.setFocusable(false);
         add(pageButtonLabel);
         pageButtonLabel.setBounds(285, 90, 30, 16);
 
-        upButtonLabel.setFont(new java.awt.Font("Arial", 2, 11));
+        upButtonLabel.setFont(new java.awt.Font("Arial", 2, 11)); // NOI18N
         upButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         upButtonLabel.setText(bundle.getString("UP")); // NOI18N
         upButtonLabel.setFocusable(false);
@@ -496,14 +499,14 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(goUpButton);
         goUpButton.setBounds(281, 89, 34, 34);
 
-        pageButtonLabel2.setFont(new java.awt.Font("Arial", 2, 11));
+        pageButtonLabel2.setFont(new java.awt.Font("Arial", 2, 11)); // NOI18N
         pageButtonLabel2.setForeground(new java.awt.Color(255, 255, 255));
         pageButtonLabel2.setText(bundle.getString("PAGE")); // NOI18N
         pageButtonLabel2.setFocusable(false);
         add(pageButtonLabel2);
         pageButtonLabel2.setBounds(285, 125, 30, 16);
 
-        downButtonLabel.setFont(new java.awt.Font("Arial", 2, 11));
+        downButtonLabel.setFont(new java.awt.Font("Arial", 2, 11)); // NOI18N
         downButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         downButtonLabel.setText(bundle.getString("DOWN")); // NOI18N
         downButtonLabel.setFocusable(false);
@@ -530,7 +533,7 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(goDownButton);
         goDownButton.setBounds(281, 124, 34, 34);
 
-        goDownLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        goDownLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         goDownLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         goDownLabel.setText(bundle.getString("GO_DOWN")); // NOI18N
         add(goDownLabel);
@@ -543,62 +546,48 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         add(goUpDownShadowLabel);
         goUpDownShadowLabel.setBounds(247, 70, 104, 127);
 
-        lookUpDownLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        lookUpDownLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         lookUpDownLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         lookUpDownLabel.setText(bundle.getString("LOOK_UP_/_DOWN")); // NOI18N
         add(lookUpDownLabel);
-        lookUpDownLabel.setBounds(330, 130, 180, 16);
+        lookUpDownLabel.setBounds(370, 130, 100, 16);
 
         ctrlButtonLabel.setBackground(new java.awt.Color(255, 255, 255));
-        ctrlButtonLabel.setFont(new java.awt.Font("Arial", 2, 12));
+        ctrlButtonLabel.setFont(new java.awt.Font("Arial", 2, 12)); // NOI18N
         ctrlButtonLabel.setForeground(new java.awt.Color(255, 255, 255));
         ctrlButtonLabel.setText(bundle.getString("CTRL")); // NOI18N
         ctrlButtonLabel.setFocusable(false);
         add(ctrlButtonLabel);
-        ctrlButtonLabel.setBounds(367, 162, 30, 15);
+        ctrlButtonLabel.setBounds(370, 160, 30, 15);
 
         ctrlButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/btn_ctrl.png"))); // NOI18N
         ctrlButton.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 255, 255), 1, true));
         ctrlButton.setBorderPainted(false);
         ctrlButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                ctrlButtonMouseEntered(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                ctrlButtonMouseExited(evt);
+            }
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 ctrlButtonMousePressed(evt);
             }
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 ctrlButtonMouseReleased(evt);
             }
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                ctrlButtonMouseExited(evt);
-            }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                ctrlButtonMouseEntered(evt);
-            }
         });
         add(ctrlButton);
-        ctrlButton.setBounds(362, 149, 42, 34);
+        ctrlButton.setBounds(360, 160, 42, 34);
 
-        leftMouseButtonShadowLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/btn_lookupdown.png"))); // NOI18N
-        leftMouseButtonShadowLabel.setFocusable(false);
-        leftMouseButtonShadowLabel.setRequestFocusEnabled(false);
-        leftMouseButtonShadowLabel.setVerifyInputWhenFocusTarget(false);
-        add(leftMouseButtonShadowLabel);
-        leftMouseButtonShadowLabel.setBounds(421, 150, 26, 36);
-
-        mouseShadowLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/bg_mouse.png"))); // NOI18N
+        mouseShadowLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/mouse-control-left-right-top-down-arrows-move.png"))); // NOI18N
         mouseShadowLabel.setFocusable(false);
         mouseShadowLabel.setRequestFocusEnabled(false);
         mouseShadowLabel.setVerifyInputWhenFocusTarget(false);
         add(mouseShadowLabel);
-        mouseShadowLabel.setBounds(420, 148, 70, 52);
+        mouseShadowLabel.setBounds(430, 150, 60, 52);
 
-        stepBackwardShadowLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/arw_lookupdown.png"))); // NOI18N
-        stepBackwardShadowLabel1.setFocusable(false);
-        stepBackwardShadowLabel1.setRequestFocusEnabled(false);
-        stepBackwardShadowLabel1.setVerifyInputWhenFocusTarget(false);
-        add(stepBackwardShadowLabel1);
-        stepBackwardShadowLabel1.setBounds(360, 146, 91, 43);
-
-        zoomInOutLabel.setFont(new java.awt.Font("Arial", 0, 10));
+        zoomInOutLabel.setFont(new java.awt.Font("Arial", 0, 10)); // NOI18N
         zoomInOutLabel.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         zoomInOutLabel.setText(bundle.getString("ZOOM_IN_/_OUT")); // NOI18N
         zoomInOutLabel.setMaximumSize(new java.awt.Dimension(150, 13));
@@ -638,6 +627,11 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
         mouseShadowLabel1.setVerifyInputWhenFocusTarget(false);
         add(mouseShadowLabel1);
         mouseShadowLabel1.setBounds(420, 60, 70, 52);
+
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/jdesktop/wonderland/modules/quickreference/client/resources/plus.png"))); // NOI18N
+        jLabel1.setText(bundle.getString("QuickReferenceJPanel.jLabel1.text")); // NOI18N
+        add(jLabel1);
+        jLabel1.setBounds(410, 170, 15, 15);
     }// </editor-fold>//GEN-END:initComponents
 
     private void stepLeftButtonMousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_stepLeftButtonMousePressed
@@ -926,9 +920,9 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
     private javax.swing.JButton goUpButton;
     private javax.swing.JLabel goUpDownShadowLabel;
     private javax.swing.JLabel goUpLabel;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel leftLabel1;
     private javax.swing.JLabel leftLabel2;
-    private javax.swing.JLabel leftMouseButtonShadowLabel;
     private javax.swing.JLabel lookUpDownLabel;
     private javax.swing.JLabel mouseShadowLabel;
     private javax.swing.JLabel mouseShadowLabel1;
@@ -944,7 +938,6 @@ public class QuickReferenceJPanel extends javax.swing.JPanel {
     private javax.swing.JButton stepBackwardButton;
     private javax.swing.JLabel stepBackwardButtonLabel;
     private javax.swing.JLabel stepBackwardShadowLabel;
-    private javax.swing.JLabel stepBackwardShadowLabel1;
     private javax.swing.JButton stepForwardButton;
     private javax.swing.JLabel stepForwardButtonLabel;
     private javax.swing.JLabel stepForwardShadowLabel;
