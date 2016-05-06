@@ -1,7 +1,9 @@
 /**
+ * Copyright (c) 2016, Envisiture Consulting, LLC, All Rights Reserved
+ */
+/**
  * Copyright (c) 2014, WonderBuilders, Inc., All Rights Reserved
  */
-
 /**
  * Open Wonderland
  *
@@ -28,6 +30,7 @@ import com.wonderbuilders.modules.capabilitybridge.client.CapabilityBridge;
 import imi.character.behavior.CharacterBehaviorManager;
 import imi.character.behavior.GoSit;
 import imi.character.statemachine.GameContext;
+import imi.character.statemachine.corestates.SitState;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.ResourceBundle;
@@ -51,6 +54,7 @@ import org.jdesktop.wonderland.client.contextmenu.spi.ContextMenuFactorySPI;
 import org.jdesktop.wonderland.client.input.Event;
 import org.jdesktop.wonderland.client.input.EventClassFocusListener;
 import org.jdesktop.wonderland.client.input.EventClassListener;
+import org.jdesktop.wonderland.client.input.InputManager;
 import org.jdesktop.wonderland.client.jme.*;
 import org.jdesktop.wonderland.client.jme.cellrenderer.CellRendererJME;
 import org.jdesktop.wonderland.client.jme.input.KeyEvent3D;
@@ -65,6 +69,7 @@ import org.jdesktop.wonderland.common.cell.CellTransform;
 import org.jdesktop.wonderland.common.cell.messages.CellMessage;
 import org.jdesktop.wonderland.common.cell.messages.CellServerComponentMessage;
 import org.jdesktop.wonderland.common.cell.state.CellComponentClientState;
+import org.jdesktop.wonderland.modules.avatarbase.client.AvatarClientPlugin;
 import org.jdesktop.wonderland.modules.avatarbase.client.jme.cellrenderer.AvatarImiJME;
 import org.jdesktop.wonderland.modules.avatarbase.client.jme.cellrenderer.WlAvatarCharacter;
 import org.jdesktop.wonderland.modules.bestview.common.BestViewChangeMessage;
@@ -76,13 +81,13 @@ import org.jdesktop.wonderland.modules.sitting.client.SittingCellComponent;
  * Cell component for best view
  *
  * @author Jonathan Kaplan <jonathankap@gmail.com>
- * @author Abhishek Upadhyay
+ * @author Abhishek Upadhyay <abhiit61@gmail.com>
  */
 public class BestViewComponent extends CellComponent
-        implements ContextMenuActionListener, CapabilityBridge {
+        implements ContextMenuActionListener, CapabilityBridge, AvatarClientPlugin.LookAtListener {
 
-    private static final Logger LOGGER =
-            Logger.getLogger(BestViewComponent.class.getName());
+    private static final Logger LOGGER
+            = Logger.getLogger(BestViewComponent.class.getName());
     private static final ResourceBundle BUNDLE = ResourceBundle.getBundle(
             "org.jdesktop.wonderland.modules.bestview.client.Bundle");
     // import the context menu component
@@ -112,11 +117,33 @@ public class BestViewComponent extends CellComponent
     private Event genEvent;
     private ScheduledExecutorService exec = null;
 
+    /**
+     * trigger bestview after look at
+     */
+    public void lookAtPerformed() {
+        if (!(ViewManager.getViewManager().getCameraController() instanceof BestViewCam)) {
+            prev = ViewManager.getViewManager().getCameraController();
+        } else {
+            BestViewCam bvcc = (BestViewCam) ViewManager.getViewManager().getCameraController();
+            prev = bvcc.getPrevCam();
+        }
+        listener.setBestView(prev
+                , ViewManager.getViewManager().getPrimaryViewCell().getWorldTransform());
+    }
+
+    public enum CameraType {
+        FIRST_PERSON,
+        THIRD_PERSON,
+        FRONT_CAMERA,
+        CHASE_CAMERA,
+        ZOOM_CAMERA
+    };
+
     public BestViewComponent(Cell cell) {
         super(cell);
         // create the context menu item and register it
-        final ContextMenuItem item =
-                new SimpleContextMenuItem(BUNDLE.getString("Best_View"), this);
+        final ContextMenuItem item
+                = new SimpleContextMenuItem(BUNDLE.getString("Best_View"), this);
         ctxMenuFactory = new ContextMenuFactorySPI() {
             public ContextMenuItem[] getContextMenuItems(ContextEvent event) {
                 return new ContextMenuItem[]{item};
@@ -156,8 +183,8 @@ public class BestViewComponent extends CellComponent
             case DISK:
                 channelComp.removeMessageReceiver(BestViewChangeMessage.class);
                 if (listener != null) {
-                    CellRenderer cellRenderer =
-                            cell.getCellRenderer(Cell.RendererType.RENDERER_JME);
+                    CellRenderer cellRenderer
+                            = cell.getCellRenderer(Cell.RendererType.RENDERER_JME);
                     CellRendererJME renderer = (CellRendererJME) cellRenderer;
                     Entity entity = renderer.getEntity();
                     listener.removeFromEntity(entity);
@@ -169,6 +196,8 @@ public class BestViewComponent extends CellComponent
                     ClientContextJME.getInputManager().removeGlobalEventListener(altKeyListener);
                 }
 
+                AvatarClientPlugin.deRegisterLookAtListener(this);
+                
                 // remove context menu item
                 contextMenu.removeContextMenuFactory(ctxMenuFactory);
                 break;
@@ -176,10 +205,10 @@ public class BestViewComponent extends CellComponent
                 if (listener == null) {
                     try {
                         //Attach a click listener
-                        CellRenderer cellRenderer =
-                                cell.getCellRenderer(Cell.RendererType.RENDERER_JME);
-                        CellRendererJME renderer =
-                                (CellRendererJME) cellRenderer;
+                        CellRenderer cellRenderer
+                                = cell.getCellRenderer(Cell.RendererType.RENDERER_JME);
+                        CellRendererJME renderer
+                                = (CellRendererJME) cellRenderer;
                         Entity entity = renderer.getEntity();
                         listener = new BestViewComponent.MouseEventListener();
                         listener.addToEntity(entity);
@@ -211,6 +240,9 @@ public class BestViewComponent extends CellComponent
                         channelComp.addMessageReceiver(BestViewChangeMessage.class, msgReceiver);
                     }
 
+                    //register this class as look at listener
+                    AvatarClientPlugin.registerLookAtListener(this);
+                    
                     //store initial values.    
                     Vector3f cellPos = cell.getWorldTransform().getTranslation(null);
                     if (offsetX == 0 && offsetY == 0 && offsetZ == 0 && lookDirX == 0 && lookDirY == 0 && lookDirZ == 0 && lookDirW == 0) {
@@ -256,17 +288,20 @@ public class BestViewComponent extends CellComponent
      * Called when the context menu is clicked
      */
     public void actionPerformed(ContextMenuItemEvent event) {
+
         //if trigger set to right click
         if (trigger == 1) {
+
             //store the current camera
-            genEvent=null;
+            genEvent = null;
             if (!(ViewManager.getViewManager().getCameraController() instanceof BestViewCam)) {
                 prev = ViewManager.getViewManager().getCameraController();
             } else {
                 BestViewCam bvcc = (BestViewCam) ViewManager.getViewManager().getCameraController();
                 prev = bvcc.getPrevCam();
             }
-            
+            //
+
             //set camera to best view
             listener.setBestView(prev,
                     ViewManager.getViewManager().getPrimaryViewCell().getWorldTransform());
@@ -320,7 +355,8 @@ public class BestViewComponent extends CellComponent
             needsUpdate = true;
         }
 
-        public void compute() {}
+        public void compute() {
+        }
 
         public void commit() {
             if (cameraNode != null && needsUpdate) {
@@ -335,7 +371,7 @@ public class BestViewComponent extends CellComponent
         }
 
         public void viewMoved(CellTransform worldTransform) {
-            // if the avatar moves, go back to the original camera
+//             if the avatar moves, go back to the original camera
             if (!viewLocation.equals(worldTransform)) {
                 ClientContextJME.getViewManager().setCameraController(prevCamera);
             }
@@ -351,6 +387,10 @@ public class BestViewComponent extends CellComponent
 
         @Override
         public boolean propagatesToParent(Event event) {
+            if(AvatarClientPlugin.getPressedKey()==1) {
+                return true;
+            }
+            
             MouseButtonEvent3D mbe = (MouseButtonEvent3D) event;
             if (trigger == 0) {
                 if (mbe.isClicked() == true && mbe.getButton() == MouseEvent3D.ButtonId.BUTTON1) {
@@ -365,62 +405,96 @@ public class BestViewComponent extends CellComponent
         @Override
         public boolean consumesEvent(final Event event) {
 
-            LOGGER.info("BestView : consumesEvent" + event);
+            LOGGER.fine("BestView : consumesEvent" + event);
+            if (AvatarClientPlugin.getPressedKey()!=1 && InputManager.isAnyKeyPressed()) {
+                return false;
+            }
+
             //if left click then check if other capabilities are triggered on lift click or not.
             //if yes then temporary disable their listener.
             if (event instanceof MouseButtonEvent3D) {
                 MouseButtonEvent3D mbe = (MouseButtonEvent3D) event;
                 if (mbe.isClicked() == true && mbe.getButton() == MouseEvent3D.ButtonId.BUTTON1) {
-                    LOGGER.info("BestView : consumesEvent");
+                    LOGGER.info("BestView : consumesEvent----start>>>");
 
+                    //if we '1' key is pressed then we need to trigger bestview
+                    if (AvatarClientPlugin.getPressedKey()==1) {
+                        return true;
+                    }
+                    
                     if (trigger == 0) {
                         SittingCellComponent sittingComp = cell.getComponent(SittingCellComponent.class);
-                        if (sittingComp != null) {
+                        LOGGER.info("sittingComp : " + sittingComp);
+                        if (sittingComp != null && sittingComp.onLeftClick()) {
                             Cell avatarCell = ClientContextJME.getViewManager().getPrimaryViewCell();
                             CellRenderer rend = avatarCell.getCellRenderer(Cell.RendererType.RENDERER_JME);
                             WlAvatarCharacter myAvatar = ((AvatarImiJME) rend).getAvatarCharacter();
                             GameContext context = myAvatar.getContext();
-                            CharacterBehaviorManager helm = context.getBehaviorManager();
-                            if (helm.getCurrentTask() instanceof GoSit) {
-                                if (exec != null) {
-                                    exec.shutdown();
-                                }
-                                exec = Executors.newSingleThreadScheduledExecutor();
-                                exec.scheduleAtFixedRate(new Runnable() {
+
+                            //if avatar is alread sitting on the cell and you click on it
+                            //, we don't need to wait for sitting to finish
+                            boolean flag = true;
+                            if((context.getCurrentState() instanceof SitState)
+                                   && cell.getCellID().toString().equals(SittingCellComponent.getOldCellId()) )
+                                flag = false;
+                            
+                            if (flag) {
+
+                                final CharacterBehaviorManager helm = context.getBehaviorManager();
+                                LOGGER.info("helm.getCurrentTask()1 : " + helm.getCurrentTask());
+                                new Thread(new Runnable() {
+
                                     public void run() {
-                                        Cell avatarCell = ClientContextJME.getViewManager().getPrimaryViewCell();
-                                        CellRenderer rend = avatarCell.getCellRenderer(Cell.RendererType.RENDERER_JME);
-                                        WlAvatarCharacter myAvatar = ((AvatarImiJME) rend).getAvatarCharacter();
-                                        GameContext context = myAvatar.getContext();
-                                        CharacterBehaviorManager helm = context.getBehaviorManager();
-                                        if (helm.getCurrentTask() == null) {
-                                            commitEvent(event);
-                                            exec.shutdown();
+                                        while (helm.getCurrentTask() == null) {
+                                            LOGGER.info("helm.getCurrentTask()2 : " + helm.getCurrentTask());
+                                        }
+                                        LOGGER.info("helm.getCurrentTask()3 : " + helm.getCurrentTask());
+                                        if (helm.getCurrentTask() instanceof GoSit) {
+                                            if (exec != null) {
+                                                exec.shutdown();
+                                            }
+                                            exec = Executors.newSingleThreadScheduledExecutor();
+                                            exec.scheduleAtFixedRate(new Runnable() {
+                                                public void run() {
+                                                    Cell avatarCell = ClientContextJME.getViewManager().getPrimaryViewCell();
+                                                    CellRenderer rend = avatarCell.getCellRenderer(Cell.RendererType.RENDERER_JME);
+                                                    WlAvatarCharacter myAvatar = ((AvatarImiJME) rend).getAvatarCharacter();
+                                                    GameContext context = myAvatar.getContext();
+                                                    CharacterBehaviorManager helm = context.getBehaviorManager();
+                                                    LOGGER.info("helm.getCurrentTask()4 : " + helm.getCurrentTask());
+                                                    if (helm.getCurrentTask() == null) {
+                                                        commitEvent(event);
+                                                        LOGGER.info("Calling commitEvent-----****");
+                                                        exec.shutdown();
+                                                    }
+                                                }
+                                            }, 0, 1, TimeUnit.SECONDS);
                                         }
                                     }
-                                }, 0, 1, TimeUnit.SECONDS);
+                                }).start();
                             }
+                            LOGGER.info("BestView : consumesEvent----stop<<<");
                             return false;
                         }
                         //Iterate all components of this cell and see if any one implements the CapabilityBridge.
                         //Disable the mouse listener if the component is a CapabilityBridge
                         //Then do the same for the parent cell
-                        for(CellComponent comp : cell.getComponents()) {
+                        for (CellComponent comp : cell.getComponents()) {
                             if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                                 CapabilityBridge bridge = (CapabilityBridge) comp;
                                 EventClassListener listener = bridge.getMouseEventListener();
-                                if(listener!=null) {
+                                if (listener != null) {
                                     listener.setEnabled(false);
                                 }
                             }
                         }
                         //for parent cell
-                        if(cell.getParent()!=null) {
-                            for(CellComponent comp : cell.getParent().getComponents()) {
+                        if (cell.getParent() != null) {
+                            for (CellComponent comp : cell.getParent().getComponents()) {
                                 if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                                     CapabilityBridge bridge = (CapabilityBridge) comp;
                                     EventClassListener listener = bridge.getMouseEventListener();
-                                    if(listener!=null) {
+                                    if (listener != null) {
                                         listener.setEnabled(false);
                                     }
                                 }
@@ -436,27 +510,34 @@ public class BestViewComponent extends CellComponent
         @Override
         public void commitEvent(Event event) {
             MouseButtonEvent3D mbe = (MouseButtonEvent3D) event;
-
             //Make sure its a click!
             if (mbe.isClicked() == true && mbe.getButton() == MouseEvent3D.ButtonId.BUTTON1) {
-                //if trigger is set to left click
-                if (trigger == 0) {
+                LOGGER.info("BestView : commitEvent----start>>>");
+                LOGGER.info("BestView : trigger----" + trigger);
+                
+                //if trigger is set to left click or
+                //if '1' is pressed
+                if (trigger == 0 || AvatarClientPlugin.getPressedKey()==1) {
                     //check if user tries to use ez move functionality or not
                     //so check if alt is already pressed
                     //if pressed then dont set bestview camera
+                    LOGGER.info("BestView : !isAltPressed()----" + !isAltPressed());
                     if (!isAltPressed()) {
-
                         //store current camera as previous camera
                         if (!(ViewManager.getViewManager().getCameraController() instanceof BestViewCam)) {
                             prev = ViewManager.getViewManager().getCameraController();
+                            LOGGER.info("BestView : if----");
                         } else {
                             BestViewCam bvcc = (BestViewCam) ViewManager.getViewManager().getCameraController();
                             prev = bvcc.getPrevCam();
+                            LOGGER.info("BestView : else----");
                         }
+                        LOGGER.info("BestView : setting bestview----");
                         setBestView(prev,
                                 ViewManager.getViewManager().getPrimaryViewCell().getWorldTransform());
                     }
                 }
+                LOGGER.info("BestView : commitEvent----stop>>>");
             }
         }
 
@@ -481,6 +562,19 @@ public class BestViewComponent extends CellComponent
                 lookDirY = xform.getRotation(null).y;
                 lookDirZ = xform.getRotation(null).z;
                 lookDirW = xform.getRotation(null).w;
+            }
+
+            if (lookDirX == -0) {
+                lookDirX = 0;
+            }
+            if (lookDirY == -0) {
+                lookDirY = 0;
+            }
+            if (lookDirZ == -0) {
+                lookDirZ = 0;
+            }
+            if (lookDirW == -0) {
+                lookDirW = 0;
             }
 
             Vector3f cameraPos = new Vector3f((cellPos.x - offsetX), cellPos.y - offsetY, (cellPos.z - offsetZ));
@@ -568,10 +662,28 @@ public class BestViewComponent extends CellComponent
                 BestViewChangeMessage msg = new BestViewChangeMessage(cell.getCellID(), bvss);
                 cell.sendCellMessage(msg);
             }
+
+            CameraType type = CameraType.ZOOM_CAMERA;
+            if (MainFrameImpl.getFirstPersonRB().isSelected()) {
+                type = CameraType.FIRST_PERSON;
+            }
+            if (MainFrameImpl.getFrontPersonRB().isSelected()) {
+                type = CameraType.FRONT_CAMERA;
+            }
+            if (MainFrameImpl.getThirdPersonRB().isSelected()) {
+                type = CameraType.THIRD_PERSON;
+            }
+            if (AvatarClientPlugin.getChaseCameraMI().isSelected()) {
+                type = CameraType.CHASE_CAMERA;
+            }
+
             //create best view camera
             CameraController camera = new BestViewCam(ViewManager.getViewManager().getCameraTransform(), new CellTransform(cameraRot, cameraPos),
-                    0f, 1500, prev, genEvent, cell);
+                    0f, 1500, prev, genEvent, cell, type);
             ClientContextJME.getViewManager().setCameraController(camera);
+
+            MainFrameImpl.getBestViewRB().setVisible(true);
+            MainFrameImpl.getBestViewRB().setSelected(true);
         }
     }
 
@@ -582,24 +694,24 @@ public class BestViewComponent extends CellComponent
 
         //done the work of bestview
         //so enable all the other components
-        if(genEvent!=null) {
+        if (genEvent != null) {
             for (CellComponent comp : cell.getComponents()) {
                 if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                     CapabilityBridge bridge = (CapabilityBridge) comp;
                     EventClassListener listener = bridge.getMouseEventListener();
-                    if(listener!=null) {
+                    if (listener != null) {
                         listener.setEnabled(true);
                         listener.commitEvent(genEvent);
                     }
                 }
             }
             //for parent cell
-            if(cell.getParent()!=null) {
+            if (cell.getParent() != null) {
                 for (CellComponent comp : cell.getParent().getComponents()) {
                     if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                         CapabilityBridge bridge = (CapabilityBridge) comp;
                         EventClassListener listener = bridge.getMouseEventListener();
-                        if(listener!=null) {
+                        if (listener != null) {
                             listener.setEnabled(true);
                             listener.commitEvent(genEvent);
                         }

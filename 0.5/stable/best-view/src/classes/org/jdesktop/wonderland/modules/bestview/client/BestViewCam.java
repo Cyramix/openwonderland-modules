@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2016, Envisiture Consulting, LLC, All Rights Reserved
+ */
+/**
  * Copyright (c) 2014, WonderBuilders, Inc., All Rights Reserved
  */
 package org.jdesktop.wonderland.modules.bestview.client;
@@ -8,26 +11,31 @@ import com.jme.math.Vector3f;
 import com.jme.renderer.ColorRGBA;
 import com.jme.scene.CameraNode;
 import com.wonderbuilders.modules.capabilitybridge.client.CapabilityBridge;
+import imi.character.avatar.AvatarContext;
+import imi.character.statemachine.GameContext;
 import java.awt.event.MouseWheelEvent;
-import java.util.List;
-import java.util.logging.Logger;
 import org.jdesktop.mtgame.WorldManager;
 import org.jdesktop.wonderland.client.cell.Cell;
 import org.jdesktop.wonderland.client.cell.CellComponent;
+import org.jdesktop.wonderland.client.cell.CellRenderer;
 import org.jdesktop.wonderland.client.cell.utils.CellPlacementUtils;
 import org.jdesktop.wonderland.client.input.Event;
 import org.jdesktop.wonderland.client.input.EventClassFocusListener;
 import org.jdesktop.wonderland.client.input.EventClassListener;
 import org.jdesktop.wonderland.client.jme.CameraController;
 import org.jdesktop.wonderland.client.jme.ClientContextJME;
+import org.jdesktop.wonderland.client.jme.MainFrameImpl;
 import org.jdesktop.wonderland.client.jme.input.MouseEvent3D;
 import org.jdesktop.wonderland.client.jme.input.MouseWheelEvent3D;
 import org.jdesktop.wonderland.common.cell.CellTransform;
+import org.jdesktop.wonderland.modules.avatarbase.client.AvatarClientPlugin;
+import org.jdesktop.wonderland.modules.avatarbase.client.jme.cellrenderer.AvatarImiJME;
+import org.jdesktop.wonderland.modules.avatarbase.client.jme.cellrenderer.WlAvatarCharacter;
 
 /**
  * Best view camera
- * 
- * @author Abhishek Upadhyay
+ *
+ * @author Abhishek Upadhyay <abhiit61@gmail.com>
  */
 public class BestViewCam extends EventClassFocusListener implements CameraController {
 
@@ -48,10 +56,11 @@ public class BestViewCam extends EventClassFocusListener implements CameraContro
     boolean bestView = false;
     private Event genEvent;
     private Cell cell;
+    private BestViewComponent.CameraType prevCameraType;
 
     public BestViewCam(CellTransform start, CellTransform target,
             float distance, long moveTime, CameraController prevCam,
-            Event event, Cell cell) {
+            Event event, Cell cell, BestViewComponent.CameraType prevCameraType) {
         this.start = start;
         this.target = target;
         this.distance = distance;
@@ -60,6 +69,7 @@ public class BestViewCam extends EventClassFocusListener implements CameraContro
         this.wm = WorldManager.getDefaultWorldManager();
         this.genEvent = event;
         this.cell = cell;
+        this.prevCameraType = prevCameraType;
     }
 
     public void setEnabled(boolean enabled, CameraNode cameraNode) {
@@ -77,23 +87,23 @@ public class BestViewCam extends EventClassFocusListener implements CameraContro
 
         if (doneMoving) {
             //enable listeners
-            if(genEvent!=null) {
+            if (genEvent != null) {
                 for (CellComponent comp : cell.getComponents()) {
                     if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                         CapabilityBridge bridge = (CapabilityBridge) comp;
                         EventClassListener listener = bridge.getMouseEventListener();
-                        if(listener!=null) {
+                        if (listener != null) {
                             listener.setEnabled(true);
                             listener.commitEvent(genEvent);
                         }
                     }
                 }
-                if(cell.getParent()!=null) {
+                if (cell.getParent() != null) {
                     for (CellComponent comp : cell.getParent().getComponents()) {
                         if (comp instanceof CapabilityBridge && !(comp instanceof BestViewComponent)) {
                             CapabilityBridge bridge = (CapabilityBridge) comp;
                             EventClassListener listener = bridge.getMouseEventListener();
-                            if(listener!=null) {
+                            if (listener != null) {
                                 listener.setEnabled(true);
                                 listener.commitEvent(genEvent);
                             }
@@ -151,10 +161,49 @@ public class BestViewCam extends EventClassFocusListener implements CameraContro
         }
     }
 
+    private boolean didAvatarMoved() {
+        Cell avatarCell = ClientContextJME.getViewManager().getPrimaryViewCell();
+        CellRenderer rend = avatarCell.getCellRenderer(Cell.RendererType.RENDERER_JME);
+        WlAvatarCharacter myAvatar = ((AvatarImiJME) rend).getAvatarCharacter();
+        GameContext context = myAvatar.getContext();
+        return (context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Forward.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Back.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Left.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Right.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Strafe_Left.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Strafe_Right.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Up.ordinal())
+            || context.getTriggerState().isKeyPressed(AvatarContext.TriggerNames.Move_Down.ordinal()));
+    }
+    
     public void viewMoved(CellTransform worldTransform) {
-        if (doneMoving) {
+        // if the avatar moves, go back to the original camera
+        if (doneMoving && didAvatarMoved()) {
+            MainFrameImpl.getBestViewRB().setVisible(false);
+            MainFrameImpl.getBestViewRB().setSelected(false);
             ClientContextJME.getViewManager().setCameraController(prevCam);
+
+            //set checkbox according to previous view
+
+            switch (prevCameraType) {
+                case CHASE_CAMERA:
+                    AvatarClientPlugin.getChaseCameraMI().setSelected(true);
+                    break;
+                case FIRST_PERSON:
+                    MainFrameImpl.getFirstPersonRB().setSelected(true);
+                    break;
+                case THIRD_PERSON:
+                    MainFrameImpl.getThirdPersonRB().setSelected(true);
+                    break;
+                case FRONT_CAMERA:
+                    MainFrameImpl.getFrontPersonRB().setSelected(true);
+                    break;
+                default:
+                    MainFrameImpl.getZoomRB().setSelected(true);
+
+            }
         }
+
     }
 
     public CameraController getPrevCam() {
