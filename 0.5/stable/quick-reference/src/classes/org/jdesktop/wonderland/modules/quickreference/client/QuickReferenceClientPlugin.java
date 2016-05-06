@@ -1,4 +1,7 @@
 /**
+ * Copyright (c) 2016, Envisiture Consulting, LLC, All Rights Reserved
+ */
+/**
  * Open Wonderland
  *
  * Copyright (c) 2011, Open Wonderland Foundation, All Rights Reserved
@@ -57,6 +60,7 @@ import org.jdesktop.wonderland.client.hud.HUDManagerFactory;
  * Client-side plugin for the quick reference sheet
  * 
  * @author Jordan Slott <jslott@dev.java.net>
+ * @author Abhishek Upadhyay <abhiit61@gmail.com>
  */
 @Plugin
 public class QuickReferenceClientPlugin extends BaseClientPlugin {
@@ -140,7 +144,6 @@ public class QuickReferenceClientPlugin extends BaseClientPlugin {
         hudComponent = mainHUD.createComponent(quickReferenceJPanel);
         hudComponent.setName(BUNDLE.getString("Quick_Reference"));
         hudComponent.setPreferredLocation(Layout.SOUTHEAST);
-        hudComponent.setSize(200, 200);
         mainHUD.addComponent(hudComponent);
 
         // Track when the HUD Component is closed. We need to update the state
