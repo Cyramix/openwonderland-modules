@@ -25,6 +25,7 @@ public class SessionRecordingConfiguration {
     private int MAX_LENGTH = 1;
     private String vimeoToken = "";
     private String defaultGroup = "";
+    private String ffmpegPath = "";
 
     public Map<String, GroupData> getGroupData() {
         return groupData;
@@ -56,6 +57,14 @@ public class SessionRecordingConfiguration {
 
     public void setDefaultGroup(String defaultGroup) {
         this.defaultGroup = defaultGroup;
+    }
+
+    public String getFfmpegPath() {
+        return ffmpegPath;
+    }
+
+    public void setFfmpegPath(String ffmpegPath) {
+        this.ffmpegPath = ffmpegPath;
     }
     
 }

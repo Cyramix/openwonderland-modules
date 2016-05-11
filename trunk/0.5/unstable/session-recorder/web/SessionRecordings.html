@@ -336,6 +336,7 @@
                 var groupName = "";
                 var pass = "";
                 populateMaxLength();
+                populateFfmpegPath();
                 populateVimeoToken();
                 populateDefaultGroup();
                 $("#loadingGroupText").show();
@@ -380,7 +381,6 @@
                         $('#save').attr('disabled', 'disabled');
                     },
                     error: function (data) {
-                        console.log(data); //or whatever
                         $("#loadingGroupText").text("No group data found!");
                     }
                 });
@@ -406,6 +406,25 @@
                             maxLength: inputText.value
                         },
                         dataType: "json"
+                    });
+                }
+            }
+            
+            function populateFfmpegPath() {
+                $.get('resources/sessionRecordings/getffmpegPath', function (data) {
+                    $('#ffmpegPath').val(data.ffmpegPath);
+                });
+            }
+
+            function saveFfmpegPath(inputText) {
+                if(inputText.value !=="") {
+                    $.ajax({
+                        type: "POST",
+                        url: 'resources/sessionRecordings/saveffmpegPath',
+                        data: {
+                            path: inputText.value
+                        },
+                        dataType: "json",
                     });
                 }
             }
@@ -600,7 +619,21 @@
                         <table class="table" style="width:auto;border-collapse: initial; align:left;">
                             <tbody>
                                 <tr>
-                                    <td style="border:none">
+                                    <td style="border:none; vertical-align: middle;">
+                                        <label class="control-label">Full FFMPEG path: </label>
+                                    </td>
+                                    <td style="border:none;">
+                                        <input id="ffmpegPath" type="text" class="form-control" size="31" onblur="saveFfmpegPath(this)" />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                    <form>
+                        <table class="table" style="width:auto;border-collapse: initial; align:left;">
+                            <tbody>
+                                <tr>
+                                    <td style="border:none; vertical-align: middle;">
                                         <label class="control-label">Vimeo API Access Token: </label>
                                     </td>
                                     <td style="border:none;">
@@ -608,7 +641,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td style="border:none">
+                                    <td style="border:none;  vertical-align: middle;">
                                         <label class="control-label">Default Group to Upload Video: </label>
                                     </td>
                                     <td style="border:none;">

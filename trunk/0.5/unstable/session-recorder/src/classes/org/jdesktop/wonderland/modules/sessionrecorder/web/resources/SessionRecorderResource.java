@@ -864,6 +864,77 @@ public class SessionRecorderResource {
     }
 
     /**
+     * get the abstract path to ffmpeg from the configuration file
+     *
+     * @return
+     */
+    @GET
+    @Path("getffmpegPath")
+    @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
+    public Response getFfmpegPath() {
+        LOGGER.log(Level.INFO, "{0}:getFfmpegPath():Start", this.getClass().getName());
+        if (getFFmpegLocation() != null) {
+            return Response.ok(new FfmpegPath(getFFmpegLocation())).build();
+        }
+
+        LOGGER.log(Level.WARNING, "{0}:getFfmpegPath():End:No data found", this.getClass().getName());
+        return Response.status(Response.Status.NO_CONTENT)
+                .entity("No data found").build();
+    }
+
+    /**
+     * wrapper for ffmpeg abstract path
+     */
+    @XmlRootElement(name = "ffmpegPath")
+    public static class FfmpegPath {
+
+        private String ffmpegPath = "";
+
+        public FfmpegPath() {
+        }
+
+        public FfmpegPath(String ffmpegPath) {
+            this.ffmpegPath = ffmpegPath;
+        }
+
+        @XmlElement
+        public String getFfmpegPath() {
+            return ffmpegPath;
+        }
+    }
+
+    /**
+     * save the vimeo api access token or the key to the configuration file
+     *
+     * @param formParams
+     */
+    @POST
+    @Path("saveffmpegPath")
+    public void saveFfmpegPath(MultivaluedMap<String, String> formParams) {
+        LOGGER.log(Level.INFO, "{0}:saveFfmpegPath():Start", this.getClass().getName());
+        try {
+            ContentNode node = dir.getChild("SessionRecorderConfiguration");
+            if (node == null || !(node instanceof ContentResource)) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+            final SessionRecordingConfiguration config = readConfig((ContentResource) node);
+            String path = formParams.get("path").toString();
+            path = path.substring(1, path.lastIndexOf("]"));
+            config.setFfmpegPath(path);
+            writeConfig(config);
+            vimeoTokenUpdated = true;
+
+        } catch (JAXBException ex) {
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        } catch (ContentRepositoryException ex) {
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
+        }
+        LOGGER.log(Level.INFO, "{0}:saveFfmpegPath():End", this.getClass().getName());
+    }
+
+    /**
      * get the vimeo access token from the configuration file
      *
      * @return
@@ -932,9 +1003,11 @@ public class SessionRecorderResource {
             writeConfig(config);
             vimeoTokenUpdated = true;
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         LOGGER.log(Level.INFO, "{0}:saveVimeoToken():End", this.getClass().getName());
     }
@@ -995,9 +1068,11 @@ public class SessionRecorderResource {
             config.setDefaultGroup(group);
             writeConfig(config);
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         LOGGER.log(Level.INFO, "{0}:saveDefaultGroup():End", this.getClass().getName());
     }
@@ -1093,9 +1168,11 @@ public class SessionRecorderResource {
                 updatePassword(data);
             }
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         LOGGER.log(Level.INFO, "{0}:saveGroupPassword():End", this.getClass().getName());
     }
@@ -1150,11 +1227,14 @@ public class SessionRecorderResource {
 
             }
         } catch (IOException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         LOGGER.log(Level.INFO, "{0}:updatePassword():End", this.getClass().getName());
     }
@@ -1182,20 +1262,23 @@ public class SessionRecorderResource {
                     FileUtils.copyFile(prev, file);
                 }
             } catch (Exception ex) {
-                Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(SessionRecorderResource.class
+                        .getName()).log(Level.SEVERE, null, ex);
             } finally {
                 if (fr != null) {
                     try {
                         fr.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(SessionRecorderResource.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 if (fw != null) {
                     try {
                         fw.close();
                     } catch (IOException ex) {
-                        Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(SessionRecorderResource.class
+                                .getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -1208,13 +1291,20 @@ public class SessionRecorderResource {
      * @return
      */
     private String getFFmpegLocation() {
-        String ffmpeg = "ffmpeg";
-        if (System.getProperty("os.name").contains("Mac OS")) {
-            ffmpeg = "/usr/local/bin/ffmpeg";
-        } else if (System.getProperty("os.name").contains("Windows")) {
-            ffmpeg = "C:/ffmpeg/bin/ffmpeg";
-        } else {
-            ffmpeg = "/home/ubuntu/bin/ffmpeg";
+        String ffmpeg = null;
+        try {
+            ContentNode node = dir.getChild("SessionRecorderConfiguration");
+            if (node == null || !(node instanceof ContentResource)) {
+                throw new WebApplicationException(Response.Status.NOT_FOUND);
+            }
+            final SessionRecordingConfiguration config = readConfig((ContentResource) node);
+            if (!config.getFfmpegPath().equals("") && !config.getFfmpegPath().trim().equals("")) {
+                ffmpeg = config.getFfmpegPath();
+            }
+        } catch (ContentRepositoryException ex) {
+            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JAXBException ex) {
+            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
         }
         return ffmpeg;
     }
@@ -1243,9 +1333,11 @@ public class SessionRecorderResource {
             in.close();
 
         } catch (IOException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (InterruptedException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -1266,7 +1358,8 @@ public class SessionRecorderResource {
     @Path("createMovies")
     @Produces({MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML})
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    public String createMovie(@FormParam("movieName") String movieName, @FormParam("frameRate") String frameRate, @FormParam("frameCounter") String frameCounter, @FormParam("username") String username, @FormParam("tags") String tags, @FormParam("sessionRecordingID") final String sessionRecordingID, @FormParam("repairImageSource")
+    public String createMovie(@FormParam("movieName") String movieName, @FormParam("frameRate") String frameRate, @FormParam("frameCounter") String frameCounter, @FormParam("username") String username, @FormParam("tags") String tags, @FormParam("sessionRecordingID")
+            final String sessionRecordingID, @FormParam("repairImageSource")
             final String repairImageSource) {
         LOGGER.log(Level.INFO, "{0}:createMovie():Start", this.getClass().getName());
         try {
@@ -1327,7 +1420,6 @@ public class SessionRecorderResource {
                 deleteImageDirectory(imageDir);
             }
 
-
             //Uploading the video to vimeo
             final File movieFile = new File(movieFilePath);
             final String videoName = movieName;
@@ -1339,21 +1431,25 @@ public class SessionRecorderResource {
                         try {
                             uploadToVimeo(movieFile, videoName, tag, sessionRecordingID);
                         } catch (Exception ex) {
-                            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(SessionRecorderResource.class
+                                    .getName()).log(Level.SEVERE, null, ex);
                         }
                     }
                 }).start();
             } else {
                 String videoUrl = System.getProperty("wonderland.web.server.url").toLowerCase()
-                        + "/webdav/content/groups/users/" + SessionRecording.DIR_NAME 
+                        + "/webdav/content/groups/users/" + SessionRecording.DIR_NAME
                         + "/Video/" + sessionRecordingID + ".mov";
                 writeVideoData(sessionRecordingID, videoUrl, null);
             }
             LOGGER.log(Level.INFO, "{0}:createMovie():End", this.getClass().getName());
             return movieFilePath;
         } catch (Exception ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
-            LOGGER.log(Level.INFO, "{0}:createMovie():End", this.getClass().getName());
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
+            LOGGER.log(Level.INFO,
+                    "{0}:createMovie():End", this.getClass().getName());
+
             return null;
         }
     }
@@ -1445,11 +1541,14 @@ public class SessionRecorderResource {
             //update recording with video url
             writeVideoData(recordingId, "https://vimeo.com/" + videoId, groupName);
         } catch (IOException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (VimeoException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
 
-            LOGGER.log(Level.INFO, "{0}:uploadToVimeo():End", this.getClass().getName());
+            LOGGER.log(Level.INFO,
+                    "{0}:uploadToVimeo():End", this.getClass().getName());
         }
     }
 
@@ -1480,9 +1579,11 @@ public class SessionRecorderResource {
             group = config.getDefaultGroup();
 
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         return group;
     }
@@ -1532,11 +1633,14 @@ public class SessionRecorderResource {
             writeConfig(config);
             return groupInfo;
         } catch (ContentRepositoryException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (JAXBException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(SessionRecorderResource.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
         LOGGER.log(Level.INFO, "{0}:getAllGroupData():End", this.getClass().getName());
         return groupInfo;
