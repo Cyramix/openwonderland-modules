@@ -25,6 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletContext;
@@ -122,6 +125,7 @@ public class SessionRecorderResource {
             @FormParam("username") String username, @FormParam("tags") String tags, @FormParam("sessionRecordingID") final String sessionRecordingID,
             @FormParam("repairImageSource") final String repairImageSource) {
         LOGGER.log(Level.INFO, "{0}:createAudioAndVideo():Start", this.getClass().getName());
+
         Thread t1 = new Thread(new Runnable() {
 
             public void run() {
@@ -130,13 +134,72 @@ public class SessionRecorderResource {
         });
         t1.start();
         try {
-            //if files not coverted in 5 sec, leave it and create video without audio
-            t1.join(5000);
+            //if files not coverted in 30 sec, leave it and create video without audio
+            t1.join(30000);
         } catch (InterruptedException ex) {
             Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
         }
         createMovie(recordingName, frameRate, frameCounter, username, tags, sessionRecordingID, repairImageSource);
         LOGGER.log(Level.INFO, "{0}:createAudioAndVideo():End", this.getClass().getName());
+    }
+
+    private boolean findFiles(final String recordingName, final String participantsName) {
+        LOGGER.log(Level.INFO, "participantsName : {0}", participantsName);
+        JSONArray jsonArray = new JSONArray(participantsName);
+        final List<String> participantlist = new ArrayList<String>();
+        for (int i = 0; i < jsonArray.length(); i++) {
+            participantlist.add(jsonArray.get(i).toString());
+        }
+        boolean filesFound = isFilesFound("a" + recordingName, participantlist);
+        LOGGER.log(Level.INFO, "Finding files....");
+        final Date d = new Date();
+        int counter = 30;
+        LOGGER.log(Level.INFO, "Before While....{0}", d);
+        while (!filesFound) {
+            LOGGER.log(Level.WARNING, "Inside while....counter == {0}", counter);
+            try {
+                TimeUnit.SECONDS.sleep(1);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (counter == 0) {
+                LOGGER.log(Level.WARNING, "counter is 0");
+                break;
+            }
+            counter--;
+            filesFound = isFilesFound(recordingName, participantlist);
+        }
+        LOGGER.log(Level.INFO, "Ater While....{0}", (d.getTime() - (new Date()).getTime()) / 1000);
+        if (filesFound) {
+            try {
+                TimeUnit.SECONDS.sleep(2);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SessionRecorderResource.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        LOGGER.log(Level.INFO, "files found == " + filesFound);
+        return filesFound;
+    }
+
+    private boolean isFilesFound(String recordingName, List<String> participantlist) {
+        boolean filesFound = true;
+        String path = servletContext.getRealPath("../../") + "/content/system/AudioRecordings/";
+        File auDir = new File(path);
+        for (String user : participantlist) {
+            boolean matchFound = false;
+            for (String name : auDir.list()) {
+                if (name.equals(recordingName + "-" + user + ".au")) {
+                    LOGGER.log(Level.WARNING, "File found wih name == {0}", name);
+                    matchFound = true;
+                }
+            }
+            if (!matchFound) {
+                filesFound = false;
+                break;
+            }
+
+        }
+        return filesFound;
     }
 
     /**
@@ -154,6 +217,10 @@ public class SessionRecorderResource {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public void convertAudioFiles(@FormParam("recordingName") final String recordingName, @FormParam("duration") final String duration, @FormParam("participantsName") final String participantsName) {
         LOGGER.log(Level.INFO, "{0}:convertAudioFiles():Start", this.getClass().getName());
+        if (!findFiles(recordingName, participantsName)) {
+            System.out.println("no files found");
+            return;
+        }
         ContentNode node;
         //convert the date and time to the server timezone
         try {
